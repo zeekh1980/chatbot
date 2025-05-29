@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Pipeline Metrics Dashboard</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <h1>Pipeline Metrics Dashboard</h1>
+    
+    <!-- Matplotlib Plot -->
+    <div class="plot-container">
+        <img src="data:image/png;base64,{{ plot_data }}" alt="Pipeline Metrics">
+    </div>
+    
+    <!-- Dynamic Chart.js Chart -->
+    <div class="chart-container">
+        <canvas id="metricsChart"></canvas>
+    </div>
+    
+    <script>
+        fetch('/api/data')
+            .then(response => response.json())
+            .then(data => {
+                const ctx = document.getElementById('metricsChart').getContext('2d');
+                new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: data.time_periods,
+                        datasets: [
+                            {
+                                label: 'Pipeline Runs',
+                                data: data.pipeline_runs,
+                                backgroundColor: 'rgba(54, 162, 235, 0.6)',
+                                yAxisID: 'y'
+                            },
+                            {
+                                label: 'Success Rate (%)',
+                                data: data.success_rate,
+                                borderColor: 'rgba(75, 192, 192, 1)',
+                                backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                                type: 'line',
+                                yAxisID: 'y1'
+                            },
+                            {
+                                label: 'Build Time (min)',
+                                data: data.build_time,
+                                borderColor: 'rgba(255, 99, 132, 1)',
+                                backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                                type: 'line',
+                                yAxisID: 'y2'
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        scales: {
+                            y: {
+                                type: 'linear',
+                                display: true,
+                                position: 'left',
+                                title: { text: 'Pipeline Runs', display: true }
+                            },
+                            y1: {
+                                type: 'linear',
+                                display: true,
+                                position: 'right',
+                                min: 80,
+                                max: 100,
+                                grid: { drawOnChartArea: false },
+                                title: { text: 'Success Rate (%)', display: true }
+                            },
+                            y2: {
+                                type: 'linear',
+                                display: true,
+                                position: 'right',
+                                grid: { drawOnChartArea: false },
+                                title: { text: 'Build Time (min)', display: true }
+                            }
+                        }
+                    }
+                });
+            });
+    </script>
+</body>
+</html>
